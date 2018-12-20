@@ -10,12 +10,14 @@ import com.amap.api.navi.AMapNavi;
 import com.amap.api.navi.AMapNaviListener;
 import com.amap.api.navi.AMapNaviView;
 import com.amap.api.navi.AMapNaviViewListener;
+import com.amap.api.navi.model.AMapCalcRouteResult;
 import com.amap.api.navi.model.AMapLaneInfo;
 import com.amap.api.navi.model.AMapModelCross;
 import com.amap.api.navi.model.AMapNaviCameraInfo;
 import com.amap.api.navi.model.AMapNaviCross;
 import com.amap.api.navi.model.AMapNaviInfo;
 import com.amap.api.navi.model.AMapNaviLocation;
+import com.amap.api.navi.model.AMapNaviRouteNotifyData;
 import com.amap.api.navi.model.AMapNaviTrafficFacilityInfo;
 import com.amap.api.navi.model.AMapServiceAreaInfo;
 import com.amap.api.navi.model.AimLessModeCongestionInfo;
@@ -94,7 +96,6 @@ public class RouteNaviActivity extends Activity implements AMapNaviListener, AMa
         endList.add(end);
         mAMapNavi.calculateDriveRoute(startList, endList, wayList, strategyFlag);
     }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -202,12 +203,18 @@ public class RouteNaviActivity extends Activity implements AMapNaviListener, AMa
     public void onNaviTurnClick() {
 
     }
+    @Override
+    public void onMapTypeChanged(int a) {
 
+    }
     @Override
     public void onNextRoadClick() {
 
     }
+    @Override
+    public void onCalculateRouteFailure(AMapCalcRouteResult aMapCalcRouteResult) {
 
+    }
     @Override
     public void onScanViewButtonClick() {
     }
@@ -221,7 +228,10 @@ public class RouteNaviActivity extends Activity implements AMapNaviListener, AMa
     public void updateCameraInfo(AMapNaviCameraInfo[] aMapNaviCameraInfos) {
 
     }
+    @Override
+    public void onCalculateRouteSuccess(AMapCalcRouteResult aMapCalcRouteResult){
 
+    }
     @Override
     public void updateIntervalCameraInfo(AMapNaviCameraInfo aMapNaviCameraInfo, AMapNaviCameraInfo aMapNaviCameraInfo1, int i) {
 
@@ -231,7 +241,9 @@ public class RouteNaviActivity extends Activity implements AMapNaviListener, AMa
     public void onServiceAreaUpdate(AMapServiceAreaInfo[] aMapServiceAreaInfos) {
 
     }
-
+    @Override
+    public void onNaviViewShowMode(int a) {
+    }
     @Override
     public void onNaviInfoUpdate(NaviInfo naviinfo) {
     }
@@ -288,6 +300,10 @@ public class RouteNaviActivity extends Activity implements AMapNaviListener, AMa
         }
     }
 
+    @Override
+    public void onNaviRouteNotify(AMapNaviRouteNotifyData aMapNaviRouteNotifyData) {
+
+    }
     @Override
     public void notifyParallelRoad(int i) {
 

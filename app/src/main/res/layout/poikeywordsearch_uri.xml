@@ -16,11 +16,33 @@
         android:id="@+id/snippet"
         android:layout_width="200dip"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/title"
         android:textColor="@android:color/black" />
 
+    <TextView
+        android:id="@+id/available"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/snippet"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/available"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/price"
+        android:textColor="@android:color/black" />
     <ImageButton
         android:id="@+id/start_amap_app"
         android:layout_width="wrap_content"
