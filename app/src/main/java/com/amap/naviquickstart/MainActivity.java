@@ -52,6 +52,8 @@ import com.amap.naviquickstart.util.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.System.exit;
+
 
 public class MainActivity extends AppCompatActivity implements Inputtips.InputtipsListener,SearchView.OnQueryTextListener,View.OnClickListener,NavigationView.OnNavigationItemSelectedListener ,AMapLocationListener, PoiSearch.OnPoiSearchListener, AMap.OnInfoWindowClickListener, AMap.OnMarkerClickListener, AMap.InfoWindowAdapter {
     private AMap mMap;
@@ -233,7 +235,13 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
         }
         if(marker.getTitle().contains("停车场"))
             sendRequestWithHttpURLConnection();
-        marker.showInfoWindow();
+        if(price==-1||available==-1)
+        {
+            ToastUtil.show(MainActivity.this,
+                    "网络出现问题，请重试");
+        }
+        else
+            marker.showInfoWindow();
 
         return false;
     }
@@ -255,10 +263,10 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
         title.setText(marker.getTitle());
 
         TextView snippet = (TextView) view.findViewById(R.id.snippet);
-        Log.d(TAG, "getInfoWindow: 1111111"+poiOverlay);
+      //  Log.d(TAG, "getInfoWindow: 1111111"+poiOverlay);
         int index = poiOverlay.getPoiIndex(marker);
         float distance = poiOverlay.getDistance(index);
-        Log.d(TAG, "getInfoWindow:123456 "+distance);
+        //Log.d(TAG, "getInfoWindow:123456 "+distance);
         String showDistance = Utils.getFriendlyDistance((int) distance);
         snippet.setText("距当前位置" + showDistance);
        if(marker.getTitle().contains("停车场"))          //如果是停车场，则从自己数据库调取数据
@@ -309,15 +317,26 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
         new Thread() {
             @Override
             public void run() {
-                MainActivity.this.runOnUiThread(new Runnable() {
-
+//                MainActivity.this.runOnUiThread(new Runnable() {
+//
+//                    ParkInfomation info = ParkInfomation.getLot(mLocationMarker.getPosition());
+//
+//                    @Override
+//                    public void run() {
+//                     available = info.getAvailable();
+//                     price = info.getPrice();
+//                    }
+//                });
+                try {
                     ParkInfomation info = ParkInfomation.getLot(mLocationMarker.getPosition());
-                    @Override
-                    public void run() {
-                     available = info.getAvailable();
-                     price = info.getPrice();
-                    }
-                });
+
+                available = info.getAvailable();
+                price = info.getPrice();
+                }catch (Exception e){
+                    available = -1;
+                    price=-1 ;
+
+                }
             }
         }.start();
     }
