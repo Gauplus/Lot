@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.amap.naviquickstart">
+    package="com.amap.njust">
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -14,9 +14,8 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
@@ -43,7 +42,8 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar2">
+            android:theme="@style/AppTheme.NoActionBar2"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -53,17 +53,14 @@
         <activity
             android:name=".RouteNaviActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".Login"
-            android:label="@string/title_activity_login" />
         <!-- <activity android:name=".navigation_intime"></activity> -->
         <activity android:name=".InputTipsActivity" />
         <activity android:name=".LoginandSignin.LoginOrSignin" />
-        <activity
-            android:name=".basicActivity"
-            android:label="@string/title_activity_basic"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:name=".intimeNavi"></activity>
+        <activity android:name=".intimeNavi" />
+        <activity android:name=".Group.Group" />
+        <!--<activity android:name=".Group.bottomFragment" />-->
+        <!--<activity android:name=".Group.topgroupList" />-->
+        <activity android:name=".notify.Notify"></activity>
     </application>
 
 </manifest>

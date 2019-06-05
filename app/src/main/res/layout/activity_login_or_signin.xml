@@ -51,6 +51,6 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
             android:padding="12dp"
-            android:text="登陆或注册"/>
+            android:text="登陆"/>
     </LinearLayout>
 </ScrollView>

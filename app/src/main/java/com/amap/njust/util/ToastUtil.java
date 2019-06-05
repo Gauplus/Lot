@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.amap.naviquickstart.util;
+package com.amap.njust.util;
 
 import com.amap.api.services.core.AMapException;
 

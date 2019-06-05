@@ -1,4 +1,4 @@
-package com.amap.naviquickstart.util;
+package com.amap.njust.util;
 
 import android.text.Html;
 import android.text.Spanned;

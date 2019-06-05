@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-    <LinearLayout tools:context="com.amap.naviquickstart.InputTipsActivity" android:padding="5dp" android:orientation="vertical" android:background="@color/grey" android:layout_height="match_parent" android:layout_width="match_parent" xmlns:tools="http://schemas.android.com/tools" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout tools:context="com.amap.njust.InputTipsActivity" android:padding="5dp" android:orientation="vertical" android:background="@color/grey" android:layout_height="match_parent" android:layout_width="match_parent" xmlns:tools="http://schemas.android.com/tools" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
 
 
     <LinearLayout android:orientation="horizontal" android:background="@color/white" android:layout_height="48dp" android:layout_width="match_parent">

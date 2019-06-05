@@ -1,4 +1,4 @@
-package com.amap.naviquickstart;
+package com.amap.njust;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -13,9 +13,9 @@ import android.support.v7.widget.SearchView;
 import com.amap.api.services.help.Inputtips;
 import com.amap.api.services.help.InputtipsQuery;
 import com.amap.api.services.help.Tip;
-import com.amap.naviquickstart.adapter.InputTipsAdapter;
-import com.amap.naviquickstart.util.Constants;
-import com.amap.naviquickstart.util.ToastUtil;
+import com.amap.njust.adapter.InputTipsAdapter;
+import com.amap.njust.util.Constants;
+import com.amap.njust.util.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,16 +30,16 @@ public class InputTipsActivity extends Activity implements SearchView.OnQueryTex
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_input_tips);
+        setContentView(com.amap.njust.R.layout.activity_input_tips);
         initSearchView();
-        mInputListView = (ListView) findViewById(R.id.inputtip_list);
+        mInputListView = (ListView) findViewById(com.amap.njust.R.id.inputtip_list);
         mInputListView.setOnItemClickListener(this);
-        mBack = (ImageView) findViewById(R.id.back);
+        mBack = (ImageView) findViewById(com.amap.njust.R.id.back);
         mBack.setOnClickListener(this);
     }
 
     private void initSearchView() {
-        mSearchView = (SearchView) findViewById(R.id.keyWord);
+        mSearchView = (SearchView) findViewById(com.amap.njust.R.id.keyWord);
         mSearchView.setOnQueryTextListener(this);
         //设置SearchView默认为展开显示
         mSearchView.setIconified(false);
@@ -123,7 +123,7 @@ public class InputTipsActivity extends Activity implements SearchView.OnQueryTex
 
     @Override
     public void onClick(View view) {
-        if (view.getId() == R.id.back) {
+        if (view.getId() == com.amap.njust.R.id.back) {
             this.finish();
         }
     }

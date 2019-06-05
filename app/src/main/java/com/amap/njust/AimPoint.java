@@ -1,4 +1,4 @@
-package com.amap.naviquickstart;
+package com.amap.njust;
 //目的地
 public class AimPoint {
     private String  name;  //地点名

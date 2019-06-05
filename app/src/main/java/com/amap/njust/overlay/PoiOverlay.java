@@ -1,4 +1,4 @@
-package com.amap.naviquickstart.overlay;
+package com.amap.njust.overlay;
 
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;

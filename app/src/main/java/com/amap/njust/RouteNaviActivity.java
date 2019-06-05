@@ -1,4 +1,4 @@
-package com.amap.naviquickstart;
+package com.amap.njust;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -43,10 +43,10 @@ public class RouteNaviActivity extends Activity implements AMapNaviListener, AMa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_basic_navi);
+        setContentView(com.amap.njust.R.layout.activity_basic_navi);
 
 
-        mAMapNaviView = (AMapNaviView) findViewById(R.id.navi_view);
+        mAMapNaviView = (AMapNaviView) findViewById(com.amap.njust.R.id.navi_view);
         mAMapNaviView.onCreate(savedInstanceState);
         mAMapNaviView.setAMapNaviViewListener(this);
 

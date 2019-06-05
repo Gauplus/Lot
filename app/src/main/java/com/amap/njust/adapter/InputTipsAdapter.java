@@ -1,4 +1,4 @@
-package com.amap.naviquickstart.adapter;
+package com.amap.njust.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.amap.api.services.help.Tip;
-import com.amap.naviquickstart.R;
+import com.amap.njust.R;
 
 import java.util.List;
 
