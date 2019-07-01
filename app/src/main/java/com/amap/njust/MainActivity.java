@@ -1,26 +1,42 @@
 package com.amap.njust;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
+
+import android.graphics.Point;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.util.Log;
+
+
+import com.amap.api.maps.CameraUpdate;
+
+import com.amap.api.maps.Projection;
+
+import com.amap.api.maps.model.CameraPosition;
+import com.amap.njust.Group.BigGroup;
+import com.amap.njust.notify.NotifyHistory;
+import com.amap.njust.util.DistanceUtil;
+import com.amap.njust.util.TTSUtil;
+
 import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.os.Bundle;
+
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
+
+import android.view.Display;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
+
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.support.v7.widget.SearchView;
-import android.widget.PopupWindow;
+
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,14 +48,13 @@ import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapUtils;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.SupportMapFragment;
+import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.Circle;
 import com.amap.api.maps.model.CircleOptions;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
-import com.amap.api.maps.model.animation.Animation;
-import com.amap.api.maps.model.animation.ScaleAnimation;
 import com.amap.api.navi.model.NaviLatLng;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
@@ -49,7 +64,7 @@ import com.amap.api.services.help.InputtipsQuery;
 import com.amap.api.services.help.Tip;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
-import com.amap.njust.Group.Group;
+
 import com.amap.njust.LoginandSignin.LoginOrSignin;
 import com.amap.njust.adapter.InputTipsAdapter;
 import com.amap.njust.model.ParkInfomation;
@@ -58,23 +73,33 @@ import com.amap.njust.notify.Notify;
 import com.amap.njust.overlay.PoiOverlay;
 import com.amap.njust.util.Constants;
 import com.amap.njust.util.ToastUtil;
-import com.amap.njust.util.Utils;
+import com.amap.njust.util.WakeUpUtil;
+import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechUtility;
+import com.iflytek.cloud.ui.RecognizerDialog;
+import com.iflytek.cloud.ui.RecognizerDialogListener;
 
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.net.URISyntaxException;
+
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+
+
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+
+
+
 
 
 public class MainActivity extends AppCompatActivity implements Inputtips.InputtipsListener,SearchView.OnQueryTextListener,View.OnClickListener,NavigationView.OnNavigationItemSelectedListener ,AMapLocationListener, PoiSearch.OnPoiSearchListener, AMap.OnInfoWindowClickListener, AMap.OnMarkerClickListener, AMap.InfoWindowAdapter {
@@ -85,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
     private Marker mLocationMarker;
     private Circle mLocationCircle;
     private PoiOverlay poiOverlay;
-    private AMapLocation mCurrentLocation;
+    private static AMapLocation mCurrentLocation;
     public static int  available;
     public static int price;
     private int LoginState = 0;
@@ -104,38 +129,180 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
     public static final int RESULT_CODE_KEYWORDS = 102;
     private InputTipsAdapter mIntipAdapter;
     private List<Tip> mCurrentTipList;//test
-
-
+    private WakeUpUtil wakeup;//语音唤醒
+   private static Context context;
     private Handler loginHandler ;
     private ArrayList<User> userResult;
+   private FloatingActionButton floatingActionButton;
+
+    private ArrayList<String> historyMsgs = new ArrayList<>() ;//存储历史通知
+    private  static int initTime=0; //地图中心点初始化的次数
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         setContentView(com.amap.njust.R.layout.activity_main);
-
+        context = getApplicationContext();
 //        initSearchView();
+//        TTSUtil.getInstance().init();
         mCleanKeyWords = (ImageView)findViewById(com.amap.njust.R.id.clean_keywords);
         mCleanKeyWords.setOnClickListener(this);
         NavigationView navigationView = (NavigationView) findViewById(com.amap.njust.R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         mKeyWords = "";
         setUpMapIfNeeded();
+
         initLocation();
-        initLogin();
-        initMyaccount();
+        mMap.showIndoorMap(true);
+//        initLogin();
+//        initMyaccount();
         /**************/
         if(mSocket!=null){}
         else
             initSocket();
-        addNewMarker();
+      //  addNewMarker();
         /*************/
-        new  Thread(new loginThread()).start();
+        floatingActionButton = findViewById(R.id.notifyButton);
+        initNotifyButton();
+        SpeechUtility.createUtility(context, SpeechConstant.APPID +"=5cfb6988");
+
+/************************************根据缩放级别显示用户*************************************/
+        mMap.setOnCameraChangeListener(new AMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {      //地图滑动监听
+                if(cameraPosition.zoom<17){
+                    clearUserMarkers();
+                }
+            }
+
+            @Override
+            public void onCameraChangeFinish(CameraPosition cameraPosition) {
+                float getZoomB = 17;
+                if(cameraPosition.zoom>=getZoomB)
+                {
+                    try{
+                        addGroupMarker();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
+        /*******************************语音唤醒****************/
+        wakeup = new WakeUpUtil(getContext()) {
+            @Override
+            public void wakeUp() {
+                Toast.makeText(MainActivity.this, "唤醒成功", Toast.LENGTH_SHORT).show();
+                // 开启唤醒
+                wakeup.wake();
+            }
+        };
+
+    }
+/***************************************end***************************************************/
+
+    public static Context getContext() {
+        return context;
+    }
+
+    private void clearUserMarkers() {  //移除用户标记
+        //获取地图上所有Marker
+        List<Marker> mapScreenMarkers = mMap.getMapScreenMarkers();
+        for (int i = 0; i < mapScreenMarkers.size(); i++) {
+            Marker marker = mapScreenMarkers.get(i);
+            if (marker.getObject() instanceof User) {
+                marker.remove();//移除当前Marker
+            }
+        }
 
     }
 
-  /**************通知功能的socket******************************/
+/*************************悬浮语音按钮初始化******************************************/
+public void initNotifyButton(){
+    floatingActionButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+              btnVoice();
+        }
+    });
+}
+    public  void btnVoice() {
+        RecognizerDialog dialog = new RecognizerDialog(this,null);
+
+        dialog.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
+
+        dialog.setParameter(SpeechConstant.ACCENT, "mandarin");
+
+        dialog.setListener(new RecognizerDialogListener() {
+
+            @Override
+
+            public void onResult(RecognizerResult recognizerResult, boolean b) {
+
+               sendResult(recognizerResult);
+
+            }
+
+            @Override
+
+            public void onError(SpeechError speechError) {
+
+            }
+
+        });
+
+        dialog.show();
+
+        Toast.makeText(this, "请开始说话", Toast.LENGTH_SHORT).show();
+
+    }
+    private void  sendResult(RecognizerResult results) {
+
+       Intent intent = new Intent(MainActivity.this,Notify.class);
+        String voiceMsg = parseIatResult(results.getResultString());
+       intent.putExtra("voiceMsg",voiceMsg);
+       intent.putExtra("Latitude",mCurrentLocation.getLatitude());
+       intent.putExtra("Longitude",mCurrentLocation.getLongitude());
+       startActivity(intent);
+
+    }
+    public static String parseIatResult(String json) {
+
+        StringBuffer ret = new StringBuffer();
+
+        try {
+
+            JSONTokener tokener = new JSONTokener(json);
+
+            JSONObject joResult = new JSONObject(tokener);
+
+            JSONArray words = joResult.getJSONArray("ws");
+
+            for (int i = 0; i < words.length(); i++) {
+
+                // 转写结果词，默认使用第一个结果
+
+                JSONArray items = words.getJSONObject(i).getJSONArray("cw");
+
+                JSONObject obj = items.getJSONObject(0);
+
+                ret.append(obj.getString("w"));
+
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+        return ret.toString();
+
+    }
+    /**************悬浮按钮语音输入结束************/
+    /**************通知功能的socket******************************/
   private static Socket mSocket;
 
   public static Socket getmSocket(){
@@ -150,22 +317,15 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
   }
 /*****************显示通知*********************/
     private void showMessage(String msg){
-//        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.activity_main, null, false);
-//        final PopupWindow popupWindow = new PopupWindow(view,600,400);
-//        popupWindow.setFocusable(false);  //聚焦
-//        popupWindow.setOutsideTouchable(true);//是否可以点击外部
-//        popupWindow.showAtLocation(mKeywordsTextView, Gravity.TOP,50,0);//显示的位置
-//        popupWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));//设置背景
-//        popupWindow.setTouchInterceptor(new View.OnTouchListener() {//点击监听
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                popupWindow.dismiss();
-//                return false;
-//                // 这里如果返回true的话，touch事件将被拦截
-//                // 拦截后 PopupWindow的onTouchEvent不被调用，这样点击外部区域无法dismiss
-//            }
-//        });
-            Toast.makeText(MainActivity.this,msg,Toast.LENGTH_SHORT).show();
+
+        TTSUtil.getInstance().speak(msg);   //语音
+        Toast toast = Toast.makeText(this, "上部", Toast.LENGTH_LONG);
+        Display display = getWindowManager().getDefaultDisplay();
+        int height = display.getHeight();
+        toast.setGravity(Gravity.TOP, 0, height / 6);
+       toast.makeText(MainActivity.this,msg,Toast.LENGTH_SHORT).show();
+       historyMsgs.add(msg);
+
     }
     private Emitter.Listener notifyMessage = new Emitter.Listener() {
         @Override
@@ -174,11 +334,18 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
                   runOnUiThread(new Runnable() {
                       @Override
                       public void run() {
-                          String msg = "";
+                          String[] msgs ;
+                          double latitude=0;
+                          double longitude=0;
                           try {
-                              msg += args[0].toString();
+                              msgs= args[0].toString().split("`");//将字符串切割 1.通知消息 2.精度 3.纬度
 
-                              showMessage(msg);
+                              latitude= Double.parseDouble(msgs[1]);
+                              longitude= Double.parseDouble(msgs[2]);
+                              if(DistanceUtil.getDistance(longitude,latitude,mCurrentLocation.getLongitude(),mCurrentLocation.getLatitude())<3)
+                                       showMessage(msgs[0]);
+
+
                           } catch (Exception e) {
                               e.printStackTrace();
 
@@ -191,121 +358,121 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
 
         }
     };
-    /************自动登陆***********/
-    public void initLogin() {   //自动读取本地账号信息进行登陆
-        SharedPreferences pre = getSharedPreferences("data", MODE_PRIVATE);
-        String username = pre.getString("username", null);
-        String password = pre.getString("password", null);//获取上次登陆的账号密码，如果首次登陆默认为空
-        if (username == null || password == null) {
-
-        } else {
-            sendToLogin();
-            while (LoginState != 99) {  //线程发起请求尚未返回时阻塞
-                try {
-                    TimeUnit.SECONDS.sleep(2);
-
-                    break;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if(LoginState==1){
-                    initMyaccount();
-                }
-                else {
-                    verifyErro(LoginState);
-                }
-            }
-        }
-    }
-    public boolean verify(){
-        SharedPreferences pre = getSharedPreferences("data",MODE_PRIVATE);
-        String username = pre.getString("username",null);
-        String password = pre.getString("password",null);//获取上次登陆的账号密码，如果首次登陆默认为空
-            OkHttpClient client = new OkHttpClient();
-            RequestBody body = new FormBody.Builder()
-                    .add("username", username )
-                    .add("password", password)
-                    .build();
-            Request request = new Request.Builder()
-                    .post(body)
-                    .url("http://47.102.149.164:30000/login")
-                    .build();
-            Log.d(TAG, "verify: 444444444444444444444");
-            try {
-
-                Response response = client.newCall(request).execute();
-                String responseData = response.body().string();
-
-                if(responseData.equals("1")) {
-
-                    return true;
-                }
-                else
-                    return false;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-
-        }
-    public void verifyErro(int flag){   //账号密码错误的时候出现提示
-        if(flag==1) {
-
-        }
-        else
-        {
-            Toast.makeText(MainActivity.this,"登陆失败，如要使用更多功能，请前往登陆",Toast.LENGTH_SHORT).show();
-        }
-
-    }
-    public void sendToLogin(){
-
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    boolean v = verify();
-                    Log.d(TAG, "run: "+v);
-                    if(v==true){
-                        LoginState =1;
-                    }
-                    else LoginState = 0;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    LoginState = 0;
-                }
-            }
-        }.start();
-
-    }
+//    /************自动登陆***********/
+//    public void initLogin() {   //自动读取本地账号信息进行登陆
+//        SharedPreferences pre = getSharedPreferences("data", MODE_PRIVATE);
+//        String username = pre.getString("username", null);
+//        String password = pre.getString("password", null);//获取上次登陆的账号密码，如果首次登陆默认为空
+//        if (username == null || password == null) {
+//
+//        } else {
+//            sendToLogin();
+//            while (LoginState != 99) {  //线程发起请求尚未返回时阻塞
+//                try {
+//
+//
+//                    break;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                if(LoginState==1){
+//                    initMyaccount();
+//                }
+//                else {
+//                    verifyErro(LoginState);
+//                }
+//            }
+//        }
+//    }
+//    public boolean verify(){
+//        SharedPreferences pre = getSharedPreferences("data",MODE_PRIVATE);
+//        String username = pre.getString("username",null);
+//        String password = pre.getString("password",null);//获取上次登陆的账号密码，如果首次登陆默认为空
+//            OkHttpClient client = new OkHttpClient();
+//            RequestBody body = new FormBody.Builder()
+//                    .add("username", username )
+//                    .add("password", password)
+//                    .build();
+//            Request request = new Request.Builder()
+//                    .post(body)
+//                    .url("http://47.102.149.164:30000/login")
+//                    .build();
+//            Log.d(TAG, "verify: 444444444444444444444");
+//            try {
+//
+//                Response response = client.newCall(request).execute();
+//                String responseData = response.body().string();
+//
+//                if(responseData.equals("1")) {
+//
+//                    return true;
+//                }
+//                else
+//                    return false;
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                return false;
+//            }
+//
+//        }
+//    public void verifyErro(int flag){   //账号密码错误的时候出现提示
+//        if(flag==1) {
+//
+//        }
+//        else
+//        {
+//            Toast.makeText(MainActivity.this,"登陆失败，如要使用更多功能，请前往登陆",Toast.LENGTH_SHORT).show();
+//        }
+//
+//    }
+//    public void sendToLogin(){
+//
+//        new Thread() {
+//            @Override
+//            public void run() {
+//                try {
+//                    boolean v = verify();
+//                    Log.d(TAG, "run: "+v);
+//                    if(v==true){
+//                        LoginState =1;
+//                    }
+//                    else LoginState = 0;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    LoginState = 0;
+//                }
+//            }
+//        }.start();
+//
+//    }
     /************自动登陆结束*********************/
     /************ 登陆时初始化侧边栏的用户信息************/
-    public void initMyaccount(){
-        try {
-            SharedPreferences pre = getSharedPreferences("data",MODE_PRIVATE);
-            final String username = pre.getString("username","");
-
-            LayoutInflater inflater = this.getLayoutInflater();                             //先获取当前布局的填充器
-            View view = inflater.inflate(com.amap.njust.R.layout.nav_header_main, null);   //通过填充器获取另外一个布局的对象
-            final TextView myName = view.findViewById(com.amap.njust.R.id.myName);
-           loginHandler = new Handler() {
-                public void handleMessage(Message msg) {
-                        myName.setText(username);
-                }
-            };
-
-            Log.d(TAG, "initMyaccount:1111111111111111111111111111 "+username);
-        }catch (Exception e){
-            e.printStackTrace();
-            Log.d(TAG, "initMyaccount: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhffffff");
-        }
-    }
-    class loginThread extends Thread{
-        public void run() {
-            Message message = new Message();
-            loginHandler.sendMessage(message);
-        }
-    }
+//    public void initMyaccount(){
+//        try {
+//            SharedPreferences pre = getSharedPreferences("data",MODE_PRIVATE);
+//            final String username = pre.getString("username","");
+//
+//            LayoutInflater inflater = this.getLayoutInflater();                             //先获取当前布局的填充器
+//            View view = inflater.inflate(com.amap.njust.R.layout.nav_header_main, null);   //通过填充器获取另外一个布局的对象
+//            final TextView myName = view.findViewById(com.amap.njust.R.id.myName);
+//           loginHandler = new Handler() {
+//                public void handleMessage(Message msg) {
+//                        myName.setText(username);
+//                }
+//            };
+//
+//            Log.d(TAG, "initMyaccount:1111111111111111111111111111 "+username);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            Log.d(TAG, "initMyaccount: hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhffffff");
+//        }
+//    }
+//    class loginThread extends Thread{
+//        public void run() {
+//            Message message = new Message();
+//            loginHandler.sendMessage(message);
+//        }
+//    }
 /********            侧边栏选项             *******/
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -325,14 +492,30 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
                 Intent login = new Intent(MainActivity.this,LoginOrSignin.class);
                 startActivity(login);
             }else{  //否则直接进入到组队界面
-                Intent group = new Intent(MainActivity.this,Group.class);
-                startActivity(group);
+//                Intent group = new Intent(MainActivity.this,Group.class);
+//                startActivity(group);
             }
         } else if (id == com.amap.njust.R.id.nav_share) {
-             Intent notify = new Intent(MainActivity.this,Notify.class);
-             startActivity(notify);
+//             Intent notify = new Intent(MainActivity.this,Notify.class);
+//             notify.putExtra("Latitude",mCurrentLocation.getLatitude());
+//             notify.putExtra("Longitude",mCurrentLocation.getLongitude());
+//            Log.d(TAG, "onNavigationItemSelected: " +mCurrentLocation.getLongitude());
+//             startActivity(notify);
         } else if (id == com.amap.njust.R.id.nav_send) {
-            Toast.makeText(MainActivity.this,"敬请期待",Toast.LENGTH_SHORT).show();
+            /**
+             * 本次打开收到的历史通知
+             */
+            Intent notifyHistory = new Intent(MainActivity.this, NotifyHistory.class);
+            if(historyMsgs!=null) {
+                String[] msgs = new String[historyMsgs.size()];
+                int i;
+                for(i=0;i<historyMsgs.size();i++)
+                {
+                    msgs[i] = historyMsgs.get(i)+"";
+                }
+                notifyHistory.putExtra("historyMsgs", msgs);
+            }
+            startActivity(notifyHistory);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(com.amap.njust.R.id.drawer_layout);
@@ -352,41 +535,104 @@ public class MainActivity extends AppCompatActivity implements Inputtips.Inputti
     protected void onDestroy() {
         super.onDestroy();
       //  mSocket.disconnect();// mSocket.off("notify",notifyMessage);
+        initTime=0;
         destroyLocation();
     }
 /************** end  *******************/
 /****************新增组队标记点**********************/
-public void addNewMarker(){
-    Intent intent = getIntent();
-        if(intent.getBooleanExtra("Group",true)){
-             userResult = (ArrayList<User>)intent.getSerializableExtra("userResults");
-            Log.d(TAG, "addNewMarker: group1"+(ArrayList<User>)intent.getSerializableExtra("userResults"));
-        }
-    ArrayList<LatLng> latLngs = new ArrayList<>();
-    MarkerOptions options = new MarkerOptions();
-
-    if(userResult!=null) {
-        for (User user : userResult) {
-            latLngs.add(new LatLng(user.getLatitude(), user.getLongitude()));
-            Log.d(TAG, "addNewMarker: " + user.getLatitude());
-            options.position(new LatLng(user.getLatitude(),user.getLongitude()));
-            options.title(user.getAccount()).snippet(user.getSpeed()+"");
-//            options.
-            Marker marker = mMap.addMarker(options);
-
-            Animation markerAnimation = new ScaleAnimation(0, 1, 0, 1); //初始化生长效果动画
-            markerAnimation.setDuration(1000);  //设置动画时间 单位毫秒
-            marker.setAnimation(markerAnimation);
-            marker.startAnimation();
-        }
-//        for(LatLng latlng:latLngs)
-//            mMap.addMarker(new MarkerOptions().title(user.getAccount()).snippet(user.getSpeed() + ""));
+//private void clearUserMarkers() {
+//    /**
+//     * describe 删除上次的用户标记点
+//     */
+//    //获取地图上所有Marker
+//    List<Marker> mapScreenMarkers = mMap.getMapScreenMarkers();
+//    for (int i = 0; i < mapScreenMarkers.size(); i++) {
+//        Marker marker = mapScreenMarkers.get(i);
+//        if (marker.getObject() instanceof User) {
+//            marker.remove();//移除当前Marker
+//        }
 //    }
-    }
-    else{
-        Log.d(TAG, "addNewMarker: 空的");
+//
+//}
+private ArrayList<Marker> lastMarkers = new ArrayList<>(); //用于保存上次的marker
+public void addGroupMarker(){
+/**
+ * describe 生成周围的其他用户的标记
+ */
+    BigGroup group = new BigGroup();
+    try {
+        if(lastMarkers!=null){          //将上次的标记点清除
+              for(Marker marker :lastMarkers)
+              {
+
+                  marker.remove();
+              }
+        }
+//        clearUserMarkers();
+
+        ArrayList<User> userResults = group.getUserResult(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), 10, "15651982927");
+
+        ArrayList<LatLng> latLngs = new ArrayList<>();
+        MarkerOptions options = new MarkerOptions();
+        if (userResults != null) {
+            for (User user : userResults) {
+//                for(Marker marker)
+                latLngs.add(new LatLng(user.getLatitude(), user.getLongitude()));
+                Log.d(TAG, "addNewMarker: " + user.getLatitude());
+                options.position(new LatLng(user.getLatitude(), user.getLongitude()));
+                options.title(user.getAccount()).snippet(user.getSpeed() + "");
+//            options.
+                Marker marker = mMap.addMarker(options);
+                marker.setObject(user);
+                lastMarkers.add(marker);
+//                Animation markerAnimation = new ScaleAnimation(0, 1, 0, 1); //初始化生长效果动画
+//                markerAnimation.setDuration(1000);  //设置动画时间 单位毫秒
+//                marker.setAnimation(markerAnimation);
+//                marker.startAnimation();
+                 mMap.addMarker(new MarkerOptions().title(user.getAccount()).snippet(user.getSpeed() + ""));
+//                TimeUnit.SECONDS.sleep(2);
+                userResult = userResults;
+            }
+
+        }
+    }catch (Exception e)
+    {
+        e.printStackTrace();
+        ToastUtil.show(this,"服务器异常");
     }
 }
+//小组队，暂时废弃
+//public void addNewMarker(){
+//    Intent intent = getIntent();
+//        if(intent.getBooleanExtra("Group",true)){
+//             userResult = (ArrayList<User>)intent.getSerializableExtra("userResults");
+//            Log.d(TAG, "addNewMarker: group1"+(ArrayList<User>)intent.getSerializableExtra("userResults"));
+//        }
+//    ArrayList<LatLng> latLngs = new ArrayList<>();
+//    MarkerOptions options = new MarkerOptions();
+//
+//    if(userResult!=null) {
+//        for (User user : userResult) {
+//            latLngs.add(new LatLng(user.getLatitude(), user.getLongitude()));
+//            Log.d(TAG, "addNewMarker: " + user.getLatitude());
+//            options.position(new LatLng(user.getLatitude(),user.getLongitude()));
+//            options.title(user.getAccount()).snippet(user.getSpeed()+"");
+////            options.
+//            Marker marker = mMap.addMarker(options);
+//
+//            Animation markerAnimation = new ScaleAnimation(0, 1, 0, 1); //初始化生长效果动画
+//            markerAnimation.setDuration(1000);  //设置动画时间 单位毫秒
+//            marker.setAnimation(markerAnimation);
+//            marker.startAnimation();
+//        }
+////        for(LatLng latlng:latLngs)
+////            mMap.addMarker(new MarkerOptions().title(user.getAccount()).snippet(user.getSpeed() + ""));
+////    }
+//    }
+//    else{
+//        Log.d(TAG, "addNewMarker: 空的");
+//    }
+//}
 /***************end*************************************/
 /******************* 建立地图 ***********************/
     private void setUpMapIfNeeded() {
@@ -399,6 +645,7 @@ public void addNewMarker(){
         }
         mKeywordsTextView = (TextView) findViewById(com.amap.njust.R.id.main_keywords);
         mKeywordsTextView.setOnClickListener(this);
+
     }
 
     private void destroyLocation() {
@@ -419,6 +666,7 @@ public void addNewMarker(){
         mLocationClient = new AMapLocationClient(this.getApplicationContext());
         mLocationClient.setLocationListener(this);
         mLocationClient.startLocation();
+
     }
 
 
@@ -430,6 +678,11 @@ public void addNewMarker(){
             return;
         }
         mCurrentLocation = aMapLocation;
+        if(initTime==0) {        //如果是还未进行地图中心初始化
+            CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 18, 30, 0));
+            mMap.moveCamera(mCameraUpdate);
+            initTime++;
+        }
         LatLng curLatLng = new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude());
         if (mLocationMarker == null) {
             MarkerOptions markerOptions = new MarkerOptions();
@@ -469,6 +722,7 @@ public void addNewMarker(){
 //
 //        }
         if(marker.getTitle().contains("停车场"))
+
             sendRequestWithHttpURLConnection();
         if(price==-1||available==-1)
         {
@@ -476,6 +730,9 @@ public void addNewMarker(){
                     "网络出现问题，请重试");
         }
         else  {
+//            if(available>10){
+//                marker.set
+//            }
             if(marker.isInfoWindowShown()){
                 marker.hideInfoWindow();
             }else
@@ -528,9 +785,20 @@ public void addNewMarker(){
             snippet.setText("距当前位置" + distance+"米");
             if (marker.getTitle().contains("停车场"))          //如果是停车场，则从自己数据库调取数据
             {
+
                 TextView available = (TextView) view.findViewById(com.amap.njust.R.id.available);
                 available.setText("可用车位" + this.available);
-
+                BitmapDescriptor bitmapDescriptor;
+//                if(this.available<5){
+//                    bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.marker_red));
+//                }
+//                else if(this.available>5&&this.available<10){
+//                    bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.marker_yellow));
+//                }
+//                else {
+//                    bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.marker_green));
+//                }
+//                marker.setIcon(bitmapDescriptor);
                 TextView price = (TextView) view.findViewById(com.amap.njust.R.id.price);
                 price.setText("价格" + this.price + "/时");
             }
@@ -554,6 +822,7 @@ public void addNewMarker(){
         return view;
     }
 /******************************** end *************************************/
+
     /**  模拟导航
      * 点击一键导航按钮跳转到导航页面
      *
@@ -616,7 +885,7 @@ public void addNewMarker(){
      * 开始进行poi搜索
      */
     protected void doSearchQuery(String keywords) {
-        showProgressDialog();// 显示进度框
+//        showProgressDialog();// 显示进度框
         currentPage = 1;
         // 第一个参数表示搜索字符串，第二个参数表示poi搜索类型，第三个参数表示poi搜索区域（空字符串代表全国）
         query = new PoiSearch.Query(keywords, "", mLocationClient.getLastKnownLocation().getCity());
@@ -646,7 +915,7 @@ public void addNewMarker(){
 
     @Override
     public void onPoiSearched(PoiResult result, int rCode) {
-        dissmissProgressDialog();// 隐藏对话框
+//        dissmissProgressDialog();// 隐藏对话框
         if (rCode == 1000) {
             if (result != null && result.getQuery() != null) {// 搜索poi的结果
                 if (result.getQuery().equals(query)) {// 是否是同一条
@@ -660,7 +929,7 @@ public void addNewMarker(){
                         mMap.clear();// 清理之前的图标
                         poiOverlay = new PoiOverlay(mMap, poiItems);
                         poiOverlay.removeFromMap();
-                        poiOverlay.addToMap();
+                        poiOverlay.addToMap ();
                         poiOverlay.zoomToSpan();
                         Log.d(TAG, "onPoiSearched: 111112"+poiOverlay.toString());
                     } else if (suggestionCities != null
@@ -693,6 +962,7 @@ public void addNewMarker(){
                     != null) {
                 mMap.clear();
                 Tip tip = data.getParcelableExtra(Constants.EXTRA_TIP);
+               // Log.d(TAG, "onActivityResult: "+tip.toString());
                 if (tip.getPoiID() == null || tip.getPoiID().equals("")) {
                     doSearchQuery(tip.getName());
                 } else {
@@ -729,6 +999,10 @@ public void addNewMarker(){
         }
         mPoiMarker.setTitle(tip.getName());
         mPoiMarker.setSnippet(tip.getAddress());
+        if(mPoiMarker.getTitle().contains("停车场"))
+        {
+
+        }
     }
 /********************************* end ************************************************************/
     /**
@@ -800,6 +1074,19 @@ public void addNewMarker(){
         }
 
     }
+    public LatLng getMapCenterPoint() {          //获取屏幕中心点经纬度坐标
+       View mMap1 = findViewById(com.amap.njust.R.id.map);
+        int left = mMap1.getLeft();
+        int top = mMap1.getTop();
+        int right = mMap1.getRight();
+        int bottom = mMap1.getBottom();
+        // 获得屏幕点击的位置
+        int x = (int) (mMap1.getX() + (right - left) / 2);
+        int y = (int) (mMap1.getY() + (bottom - top) / 2);
+        Projection projection = mMap.getProjection();
+        LatLng pt = projection.fromScreenLocation(new Point(x, y));
 
+        return pt;
+    }
 }
 

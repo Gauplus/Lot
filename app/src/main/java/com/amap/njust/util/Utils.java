@@ -3,6 +3,7 @@ package com.amap.njust.util;
 import android.text.Html;
 import android.text.Spanned;
 
+import com.amap.api.maps.model.LatLng;
 import com.amap.api.navi.model.AMapNaviPath;
 import com.amap.api.navi.model.AMapNaviStep;
 
@@ -75,4 +76,6 @@ public class Utils {
         }
         return trafficLightNumber;
     }
+
+
 }

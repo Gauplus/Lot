@@ -5,15 +5,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".notify.Notify">
-   <EditText
-       android:layout_width="match_parent"
-       android:layout_height="800dp"
-       android:id="@+id/notifyMessage"/>
+
    <Button
+       android:id="@+id/messageSubmit"
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
+       android:layout_marginTop="204dp"
+       android:gravity=""
        android:text="提交"
-       android:gravity="bottom"
-       android:id="@+id/messageSubmit"
-       />
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent" />
+
+   <Button
+       android:id="@+id/voideInput"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="252dp"
+       android:gravity=""
+       android:text="语音输入"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent" />
+   <EditText
+       android:layout_width="match_parent"
+       android:layout_height="200dp"
+       android:hint="请输入通知内容"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent"
+       android:id="@+id/notifyMessage"/>
+
 </android.support.constraint.ConstraintLayout>

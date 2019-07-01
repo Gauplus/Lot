@@ -8,28 +8,31 @@ android:layout_height="match_parent"
 android:fitsSystemWindows="true"
 tools:openDrawer="start">
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:animateLayoutChanges="true"
     android:background="#F9F9F9"
     android:orientation="vertical"
-    tools:context=".MainActivity"/>
+    tools:context=".MainActivity">
+
+</LinearLayout>
     <RelativeLayout
         android:orientation="vertical"
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <fragment
-        android:layout_height="match_parent"
-        android:layout_width="match_parent" class="com.amap.api.maps.SupportMapFragment"
-        android:id="@+id/map"/>
+        android:layout_width="match_parent">
 
 
-    <RelativeLayout
+        <fragment
+            android:id="@+id/map"
+            class="com.amap.api.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+        </fragment>
+
+
+        <RelativeLayout
         android:layout_height="48dp"
         android:layout_width="match_parent"
         android:background="@color/white"
@@ -37,7 +40,7 @@ tools:openDrawer="start">
         android:layout_marginRight="20dp"
         android:layout_marginLeft="20dp">
 
-    <ImageView
+            <ImageView
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
         android:id="@+id/clean_keywords"
@@ -46,41 +49,62 @@ tools:openDrawer="start">
         android:src="@mipmap/ic_close"
         android:layout_alignParentRight="true"/>
 
-    <TextView
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:id="@+id/main_keywords"
-        android:textSize="20.0sp"
-        android:textColorHint="@color/text_hint"
-        android:textColor="#000000"
-        android:singleLine="true"
-        android:paddingLeft="20dp"
-        android:maxLength="20"
-        android:inputType="text|textAutoComplete"
-        android:imeOptions="actionDone"
-        android:hint="搜索地点"
-        android:gravity="center_vertical"
-        android:dropDownVerticalOffset="2.0dip"
-        android:drawableLeft="@mipmap/ic_search"
-        android:completionThreshold="1"
-        android:clickable="true"
-        android:layout_toLeftOf="@+id/clean_keywords"/>
+            <TextView
+                android:id="@+id/main_keywords"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="-385dp"
+                android:layout_toLeftOf="@+id/clean_keywords"
+                android:clickable="true"
+                android:completionThreshold="1"
+                android:drawableLeft="@mipmap/ic_search"
+                android:dropDownVerticalOffset="2.0dip"
+                android:gravity="center_vertical"
+                android:hint="搜索地点"
+                android:imeOptions="actionDone"
+                android:inputType="text|textAutoComplete"
+                android:maxLength="20"
+                android:paddingLeft="20dp"
+                android:singleLine="true"
+                android:textColor="#000000"
+                android:textColorHint="@color/text_hint"
+                android:textSize="20.0sp" />
 
-</RelativeLayout>
 
-</RelativeLayout>
-<!--<include-->
-    <!--layout="@layout/app_bar_main"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent" />-->
 
-<android.support.design.widget.NavigationView
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="300dp"
+
+            android:layout_marginTop="450dp">
+
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/notifyButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="0dp"
+                android:clickable="true"
+                app:backgroundTint="#F44336"
+                app:srcCompat="@android:drawable/ic_btn_speak_now"
+                tools:visibility="visible" />
+        </RelativeLayout>
+
+    </RelativeLayout>
+    <android.support.design.widget.NavigationView
     android:id="@+id/nav_view"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:fitsSystemWindows="true"
     app:headerLayout="@layout/nav_header_main"
-    app:menu="@menu/activity_main_drawer" />
+    app:menu="@menu/activity_main_drawer" >
+
+    </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>

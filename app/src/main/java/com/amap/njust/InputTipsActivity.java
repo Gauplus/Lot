@@ -3,6 +3,7 @@ package com.amap.njust;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -77,6 +78,7 @@ public class InputTipsActivity extends Activity implements SearchView.OnQueryTex
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         if (mCurrentTipList != null) {
             Tip tip = (Tip) adapterView.getItemAtPosition(i);
+
             Intent intent = new Intent();
             intent.putExtra(Constants.EXTRA_TIP, tip);
             setResult(MainActivity.RESULT_CODE_INPUTTIPS, intent);

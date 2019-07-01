@@ -16,3 +16,5 @@
 #   public *;
 #}
 #-keep class android.support.widget.SearchView { *; }
+-keep class com.iflytek.**{*;}
+-keepattributes Signature

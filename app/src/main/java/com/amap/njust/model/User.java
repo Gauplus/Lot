@@ -5,7 +5,7 @@ import com.amap.api.location.AMapLocation;
 import java.io.Serializable;
 
 public class User implements Serializable{
-    String teamID = null; //用户组队id
+    //String teamID = null; //用户组队id
     String account; //用户账号
     int speed; //用户速度
     double latitude;  //
@@ -14,26 +14,26 @@ public class User implements Serializable{
         this.account = phone;
     }
     public User(String gid,String phone,int speed){
-        this.teamID = gid;
+     //   this.teamID = gid;
         this.account = phone;
         this.speed = speed;
     }
     public User(){}
-    public String getGid() {
-        return teamID;
-    }
+//    public String getGid() {
+//        return teamID;
+//    }
 
-    public void setGid(String gid) {
-        this.teamID = gid;
-    }
+//    public void setGid(String gid) {
+//        this.teamID = gid;
+//    }
+//
+//    public String getTeamID() {
+//        return teamID;
+//    }
 
-    public String getTeamID() {
-        return teamID;
-    }
-
-    public void setTeamID(String teamID) {
-        this.teamID = teamID;
-    }
+//    public void setTeamID(String teamID) {
+//        this.teamID = teamID;
+//    }
 
     public String getPhone() {
         return account;

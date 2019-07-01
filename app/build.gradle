@@ -4,18 +4,21 @@ android {
     compileSdkVersion 26
     buildToolsVersion '27.0.3'
     defaultConfig {
-        applicationId "com.amap.naviquickstart"
+        applicationId "com.amap.njust.edu"
         minSdkVersion 14
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         ndk {
-            abiFilters 'armeabi-v7a'
+            abiFilters 'x86', 'armeabi', 'armeabi-v7a', 'armeabi-v8a'
+
+
         }
     }
     sourceSets {
         main {
             jniLibs.srcDirs = ['libs']
+
         }
     }
     buildTypes {
@@ -42,11 +45,13 @@ dependencies {
     implementation 'com.qmuiteam:qmui:1.1.3'
     implementation 'com.android.support:design:26.0.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.jakewharton:butterknife:8.5.1'
     implementation 'com.cjj.materialrefeshlayout:library:1.3.0'
+    implementation 'com.jakewharton:butterknife:8.5.1'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation ('io.socket:socket.io-client:0.8.3') {//最新包
-        exclude group: 'org.json', module: 'json' //处理： WARNING: Dependency org.json:json:20090211 is ignored
+    implementation('io.socket:socket.io-client:0.8.3') {//最新包
+        exclude group: 'org.json', module: 'json'
+        //处理： WARNING: Dependency org.json:json:20090211 is ignored
     }
 }
